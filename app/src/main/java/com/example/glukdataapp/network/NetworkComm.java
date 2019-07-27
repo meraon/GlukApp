@@ -1,18 +1,13 @@
 package com.example.glukdataapp.network;
 
 import android.content.Context;
-import android.os.Looper;
-import android.widget.Toast;
 
-import com.example.glukdataapp.realm.RealmControl;
 import com.example.glukdataapp.realm.models.GlucoseEntry;
 import com.example.glukdataapp.realm.models.InsulinEntry;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -26,8 +21,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import gluklibrary.Glucose;
 import gluklibrary.Insulin;

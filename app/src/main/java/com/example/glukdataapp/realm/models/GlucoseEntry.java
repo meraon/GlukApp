@@ -1,6 +1,5 @@
 package com.example.glukdataapp.realm.models;
 
-import android.support.v7.widget.CardView;
 
 import com.example.glukdataapp.MyResources;
 
@@ -10,7 +9,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import io.realm.RealmObject;
-import io.realm.annotations.Ignore;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 

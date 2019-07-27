@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -45,9 +44,6 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.GlukDataView
             public void onDateClick(final int position) {
                 try {
                     final IModel item = dataList.get(position);
-                    Long ts = item.getTimestamp();
-                    Float v = item.getValue();
-
                     int year = item.getYear();
                     int month = item.getMonth();
                     int day = item.getDayOfMonth();
@@ -99,10 +95,10 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.GlukDataView
                             .create();
                     d.show();
 
-                    final EditText valueEditText = d.findViewById(R.id.editTextEditValue);
+                    final EditText valueEditText = (EditText) d.findViewById(R.id.editTextEditValue);
                     valueEditText.setText(item.getValueString());
-                    Button save = d.findViewById(R.id.buttonSaveValue);
-                    Button cancel = d.findViewById(R.id.buttonCancelValue);
+                    Button save = (Button) d.findViewById(R.id.buttonSaveValue);
+                    Button cancel = (Button) d.findViewById(R.id.buttonCancelValue);
 
                     save.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -172,10 +168,10 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.GlukDataView
         public GlukDataViewHolder(@NonNull View itemView, final AdapterOnClickListener listener) {
             super(itemView);
 
-            date = itemView.findViewById(R.id.textViewDate);
-            time = itemView.findViewById(R.id.textViewTime);
-            value = itemView.findViewById(R.id.textViewValue);
-            delete = itemView.findViewById(R.id.imageViewDelete);
+            date = (TextView) itemView.findViewById(R.id.textViewDate);
+            time = (TextView) itemView.findViewById(R.id.textViewTime);
+            value = (TextView) itemView.findViewById(R.id.textViewValue);
+            delete = (ImageView) itemView.findViewById(R.id.imageViewDelete);
 
             date.setOnClickListener(new View.OnClickListener() {
                 @Override

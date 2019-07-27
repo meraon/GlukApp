@@ -121,12 +121,12 @@ public class InsulinEntryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.create_entry_layout, container, false);
 
-        saveButton = view.findViewById(R.id.create_saveButton);
-        valueEditText = view.findViewById(R.id.create_entryEditText);
-        titleTextView = view.findViewById(R.id.create_titleTextView);
-        dateButton = view.findViewById(R.id.create_dateButton);
-        timeButton = view.findViewById(R.id.create_timeButton);
-        imageBackground = view.findViewById(R.id.image_background);
+        saveButton = (Button) view.findViewById(R.id.create_saveButton);
+        valueEditText = (EditText) view.findViewById(R.id.create_entryEditText);
+        titleTextView = (TextView) view.findViewById(R.id.create_titleTextView);
+        dateButton = (Button) view.findViewById(R.id.create_dateButton);
+        timeButton = (Button) view.findViewById(R.id.create_timeButton);
+        imageBackground = (ImageView) view.findViewById(R.id.image_background);
 
         return view;
     }

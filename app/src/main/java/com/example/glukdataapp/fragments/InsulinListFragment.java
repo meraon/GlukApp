@@ -63,8 +63,8 @@ public class InsulinListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entry_list_layout, container, false);
-        recyclerView = view.findViewById(R.id.recyclerViewData);
-        titleTextView = view.findViewById(R.id.textViewName);
+        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerViewData);
+        titleTextView = (TextView) view.findViewById(R.id.textViewName);
         return view;
     }
 

@@ -49,12 +49,12 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
         setContentView(R.layout.activity_main);
 
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = this.findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView nav_view = findViewById(R.id.nav_view);
-        final ImageView serverStatus = nav_view.getHeaderView(0).findViewById(R.id.server_status_icon);
+        final ImageView serverStatus = (ImageView) nav_view.getHeaderView(0).findViewById(R.id.server_status_icon);
 
 
         nav_view.setNavigationItemSelectedListener(this);
@@ -97,7 +97,6 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
             @Override
             public void sendGlucoseSuccess() {
                 realmController.clearGlucoses();
-
             }
 
             @Override
@@ -108,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
             @Override
             public void sendInsulinSuccess() {
                 realmController.clearInsulins();
-
             }
 
             @Override
