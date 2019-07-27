@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">GlukDataApp</string>
+    <string name="name_of_values">Name of Values</string>
+    <string name="date_format">yyyy/MM/dd</string>
+    <string name="time_format">HH:mm</string>
+    <string name="value_format">00.0</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="header_text">Saves time and blood pressure</string>
+    <string name="contact_info">meraon@gmail.com</string>
+    <string name="nav_drawer_open">Open navigation drawer</string>
+    <string name="nav_drawer_close">Close navigation drawer</string>
+    <string name="date">Date:</string>
+    <string name="time">Time:</string>
+    <string name="delete_entry">Delete entry</string>
+    <string name="insulin_value_format">#</string>
+    <string name="glucose_value_format">#.0</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+</resources>
