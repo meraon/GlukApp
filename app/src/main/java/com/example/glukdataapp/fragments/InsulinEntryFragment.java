@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 
 /**
@@ -121,12 +122,12 @@ public class InsulinEntryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.create_entry_layout, container, false);
 
-        saveButton = (Button) view.findViewById(R.id.create_saveButton);
-        valueEditText = (EditText) view.findViewById(R.id.create_entryEditText);
-        titleTextView = (TextView) view.findViewById(R.id.create_titleTextView);
-        dateButton = (Button) view.findViewById(R.id.create_dateButton);
-        timeButton = (Button) view.findViewById(R.id.create_timeButton);
-        imageBackground = (ImageView) view.findViewById(R.id.image_background);
+        saveButton = view.findViewById(R.id.create_saveButton);
+        valueEditText = view.findViewById(R.id.create_entryEditText);
+        titleTextView = view.findViewById(R.id.create_titleTextView);
+        dateButton = view.findViewById(R.id.create_dateButton);
+        timeButton = view.findViewById(R.id.create_timeButton);
+        imageBackground = view.findViewById(R.id.image_background);
 
         return view;
     }
@@ -179,12 +180,19 @@ public class InsulinEntryFragment extends Fragment {
                     Toast.makeText(getContext(), "Unable to parse value", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                InsulinEntry item = new InsulinEntry(realmController.generateInsulinId(),
-                        System.currentTimeMillis(),
-                        value,
-                        dayDosage);
 
-                realmController.saveValue(item);
+                try {
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.ENGLISH);
+                    String dateInString = dateButton.getText() + " " + timeButton.getText();
+                    Date date = formatter.parse(dateInString);
+                    InsulinEntry item = new InsulinEntry(realmController.generateInsulinId(),
+                            date.getTime(),
+                            value,
+                            dayDosage);
+                    realmController.saveValue(item);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         });
 

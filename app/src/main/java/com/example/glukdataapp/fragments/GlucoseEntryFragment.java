@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -108,11 +109,11 @@ public class GlucoseEntryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.create_entry_layout, container, false);
 
-        saveButton = (Button) view.findViewById(R.id.create_saveButton);
-        valueEditText = (EditText) view.findViewById(R.id.create_entryEditText);
-        titleTextView = (TextView) view.findViewById(R.id.create_titleTextView);
-        dateButton = (Button) view.findViewById(R.id.create_dateButton);
-        timeButton = (Button) view.findViewById(R.id.create_timeButton);
+        saveButton = view.findViewById(R.id.create_saveButton);
+        valueEditText = view.findViewById(R.id.create_entryEditText);
+        titleTextView = view.findViewById(R.id.create_titleTextView);
+        dateButton = view.findViewById(R.id.create_dateButton);
+        timeButton = view.findViewById(R.id.create_timeButton);
 
         return view;
     }
@@ -162,10 +163,18 @@ public class GlucoseEntryFragment extends Fragment {
                     Toast.makeText(getContext(), "Unable to parse value", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                GlucoseEntry item = new GlucoseEntry(realmController.generateGlucoseId(),
-                        System.currentTimeMillis(),
-                        value);
-                realmController.saveValue(item);
+
+                try {
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.ENGLISH);
+                    String dateInString = dateButton.getText() + " " + timeButton.getText();
+                    Date date = formatter.parse(dateInString);
+                    GlucoseEntry item = new GlucoseEntry(realmController.generateGlucoseId(),
+                            date.getTime(),
+                            value);
+                    realmController.saveValue(item);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
