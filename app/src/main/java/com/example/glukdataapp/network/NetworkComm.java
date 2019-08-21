@@ -1,14 +1,20 @@
 package com.example.glukdataapp.network;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
+import com.example.glukdataapp.R;
+import com.example.glukdataapp.SettingsActivity;
 import com.example.glukdataapp.realm.models.GlucoseEntry;
 import com.example.glukdataapp.realm.models.InsulinEntry;
+import com.google.gson.Gson;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -21,17 +27,21 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
-import gluklibrary.Glucose;
-import gluklibrary.Insulin;
-import gluklibrary.Network;
+import main.java.gluklibrary.Glucose;
+import main.java.gluklibrary.Insulin;
+import main.java.gluklibrary.Network;
 
 public class NetworkComm implements INetworkComm {
+    private static final Logger LOG = Logger.getLogger(NetworkComm.class.getSimpleName());
 
     private Context context;
     private INetworkOperationsListener operationsListener;
     private boolean isAlive;
+    private SharedPreferences prefs;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private int portTcp = 0;
 
     public INetworkOperationsListener getOperationsListener() {
         return operationsListener;
@@ -65,7 +75,7 @@ public class NetworkComm implements INetworkComm {
     public NetworkComm(Context context) {
         this.context = context;
         isAlive = false;
-        //TODO create periodic action to check for server reachable
+        prefs = PreferenceManager.getDefaultSharedPreferences(context);
         setScheduledTasks();
     }
 
@@ -73,10 +83,8 @@ public class NetworkComm implements INetworkComm {
         this.context = context;
         this.operationsListener = operationsListener;
         isAlive = false;
-        //TODO create periodic action to check for server reachable
+        prefs = PreferenceManager.getDefaultSharedPreferences(context);
         setScheduledTasks();
-
-
     }
 
     private void setScheduledTasks(){
@@ -86,7 +94,7 @@ public class NetworkComm implements INetworkComm {
                 findServer();
             }
         };
-        scheduler.scheduleAtFixedRate(udpRunnable, 0, 1000, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(udpRunnable, 0, 4000, TimeUnit.MILLISECONDS);
     }
 
     private boolean pingServer(){
@@ -117,12 +125,19 @@ public class NetworkComm implements INetworkComm {
     public InetAddress findServer() {
 
         try {
-            byte[] buf = new byte[100];
             DatagramSocket socket = new DatagramSocket();
-            InetAddress group = InetAddress.getByName(Network.IP_MULTICAST);
-            buf = Network.EXPECTED_MESSAGE.getBytes();
+            InetAddress group = InetAddress.getByName(prefs.getString(
+                    context.getString(R.string.pref_multicast_ip_key),
+                    context.getString(R.string.pref_multicast_ip_default_value)));
+            byte[] buf = Network.EXPECTED_MESSAGE.getBytes();
+            int port = Integer.parseInt(prefs.getString(
+                    context.getString(R.string.pref_multicast_port_key),
+                    context.getString(R.string.pref_multicast_port_default_value)));
             DatagramPacket sendPacket
-                    = new DatagramPacket(buf, buf.length, group, Network.DEFAULT_PORT_UDP);
+                    = new DatagramPacket(buf,
+                    buf.length,
+                    group,
+                    port);
 
             socket.send(sendPacket);
             for (int i = 0; i < buf.length; i++) {
@@ -130,30 +145,36 @@ public class NetworkComm implements INetworkComm {
             }
 
             DatagramPacket receivePacket = new DatagramPacket(buf, buf.length);
-            socket.setSoTimeout(1000);
+            socket.setSoTimeout(3000);
             socket.receive(receivePacket);
-            String received = new String(buf, 0, buf.length);
+            String received = new String(buf, 0, buf.length).trim();
 
-            if(received.trim().equals(Network.EXPECTED_RESPONSE)){
-                if(!isAlive) setAlive(true);
+            if(SettingsActivity.SettingsFragment.checkPortValidity(received)){
+                if(!isAlive) {
+                    setAlive(true);
+                    portTcp = Integer.parseInt(received);
+                }
             } else {
-                if(isAlive) setAlive(false);
+                if(isAlive) {
+                    setAlive(false);
+                }
             }
 
             serverAddress = receivePacket.getAddress();
-            isAlive();
             socket.close();
 
         } catch (SocketException ex) {
-//            Logger.getLogger(NetworkComm.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.severe(ex.toString());
         } catch (UnknownHostException ex) {
-//            Logger.getLogger(NetworkComm.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.severe(ex.toString());
         } catch (IOException ex) {
-//            Logger.getLogger(NetworkComm.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.severe(ex.toString());
             if(ex instanceof SocketTimeoutException){
                 if(isAlive) setAlive(false);
-                isAlive();
             }
+        }
+        catch (NumberFormatException ex){
+            LOG.severe(ex.toString());
         }
 
         return null;
@@ -166,19 +187,11 @@ public class NetworkComm implements INetworkComm {
 
     @Override
     public boolean isAlive() {
-        if(serverAddress == null) return false;
-        if(pingServer()) {
-            return true;
-        }
-        else {
-            findServer();
-        }
-        return pingServer();
+        return isAlive;
     }
 
     @Override
     public boolean sendGlucose(List<GlucoseEntry> items) {
-        byte[] buffer = new byte[10];
         if(!isAlive()){
             return false;
         }
@@ -189,16 +202,17 @@ public class NetworkComm implements INetworkComm {
         }
 
         try {
-            Socket socket = new Socket(serverAddress, Network.DEFAULT_PORT);
-            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            Socket socket = new Socket(serverAddress, portTcp);
+            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             BufferedReader inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            outputStream.writeObject(glucoseList);
-            outputStream.flush();
+            Gson gson = new Gson();
+            PrintWriter pw = new PrintWriter(outputStream);
+            pw.println(gson.toJson(glucoseList));
+            pw.flush();
             socket.setSoTimeout(10000);
 
             String response = inputStream.readLine();
-            //TODO handle response
             if(response.trim().equals(Network.OBJECT_ACCEPTED_MESSAGE)) {
                 if(operationsListener != null){
                     operationsListener.sendGlucoseSuccess();
@@ -232,12 +246,14 @@ public class NetworkComm implements INetworkComm {
         }
 
         try {
-            Socket socket = new Socket(serverAddress, Network.DEFAULT_PORT);
-            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            Socket socket = new Socket(serverAddress, portTcp);
+            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             BufferedReader inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            outputStream.writeObject(insulinList);
-            outputStream.flush();
+            Gson gson = new Gson();
+            PrintWriter pw = new PrintWriter(outputStream);
+            pw.println(gson.toJson(insulinList));
+            pw.flush();
             socket.setSoTimeout(10000);
 
             String response = inputStream.readLine();

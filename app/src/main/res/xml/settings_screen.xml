@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:inputType="number|numberDecimal"
+        android:digits="0123456789."
+        android:defaultValue="@string/pref_multicast_ip_default_value"
+        android:key="@string/pref_multicast_ip_key"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/pref_multicast_ip_summary"
+        android:title="@string/pref_multicast_ip" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_multicast_port_default_value"
+        android:key="@string/pref_multicast_port_key"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/pref_multicast_port_summary"
+        android:title="@string/pref_multicast_port" />
+    <SwitchPreference
+        android:defaultValue="@string/pref_delete_after_upload_default_value"
+        android:key="@string/pref_delete_after_upload_key"
+        android:title="@string/pref_delete_after_upload" />
+</PreferenceScreen>

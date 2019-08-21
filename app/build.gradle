@@ -43,4 +43,5 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4-rule-agent:1.6.2'
     testImplementation 'org.powermock:powermock-module-junit4-rule:1.6.2'
     testImplementation 'org.powermock:powermock-module-junit4:1.6.2'
+    implementation fileTree(dir: 'D:\\Android\\GlukDataApp\\json', include: ['*.aar', '*.jar'], exclude: [])
 }

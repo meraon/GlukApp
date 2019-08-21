@@ -16,5 +16,16 @@
     <string name="insulin_value_format">#</string>
     <string name="glucose_value_format">#.0</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="pref_multicast_ip_key">udp_multicast_ip</string>
+    <string name="pref_multicast_ip">Multicast IP</string>
+    <string name="pref_multicast_ip_summary">multicast ip on which server listens for clients</string>
+    <string name="pref_multicast_ip_default_value">239.0.0.0</string>
+    <string name="pref_multicast_port_key">udp_port</string>
+    <string name="pref_multicast_port">Multicast Port</string>
+    <string name="pref_multicast_port_summary">multicast port on which server listens for clients</string>
+    <string name="pref_multicast_port_default_value">11223</string>
+    <string name="pref_delete_after_upload_key">delete_after_upload</string>
+    <string name="pref_delete_after_upload">Delete saved data after upload</string>
+    <string name="pref_delete_after_upload_default_value">false</string>
+
 </resources>

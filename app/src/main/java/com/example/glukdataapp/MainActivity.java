@@ -1,14 +1,17 @@
 package com.example.glukdataapp;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -25,9 +28,8 @@ import com.example.glukdataapp.realm.RealmControl;
 
 import java.util.logging.Logger;
 
-import gluklibrary.HelperMethods;
-import gluklibrary.Network;
 import io.realm.Realm;
+import main.java.gluklibrary.HelperMethods;
 
 
 public class MainActivity extends AppCompatActivity implements GlucoseEntryFragment.OnFragmentInteractionListener, NavigationView.OnNavigationItemSelectedListener {
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
     IRealmControl realmController;
     INetworkComm networkComm;
     Handler handler;
+    SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,32 +48,31 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
         initMyResources();
         Realm.init(this);
 
-
+        //load content view and toolbar
         setContentView(R.layout.activity_main);
-
-
         Toolbar toolbar = this.findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //load navigation view
         drawer = findViewById(R.id.drawer_layout);
         NavigationView nav_view = findViewById(R.id.nav_view);
-        final ImageView serverStatus = (ImageView) nav_view.getHeaderView(0).findViewById(R.id.server_status_icon);
-
-
+        final ImageView serverStatus = nav_view.getHeaderView(0).findViewById(R.id.server_status_icon);
         nav_view.setNavigationItemSelectedListener(this);
-
-        ActionBarDrawerToggle toggle =  new ActionBarDrawerToggle(this,
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
                 drawer,
                 toolbar,
                 R.string.nav_drawer_open, R.string.nav_drawer_close);
         drawer.addDrawerListener(toggle);
-
-
         toggle.syncState();
 
+        //init handler and realm
         handler = new Handler();
         realmController = new RealmControl();
 
+        //init shared preferences
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        //init network
         NetworkComm.INetworkOperationsListener operationsListener = new NetworkComm.INetworkOperationsListener() {
             @Override
             public void notifyServerReachable() {
@@ -96,7 +98,10 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
 
             @Override
             public void sendGlucoseSuccess() {
-                realmController.clearGlucoses();
+                boolean deleteAfterUpload = prefs.getBoolean(getString(R.string.pref_delete_after_upload_key), false);
+                if (deleteAfterUpload){
+                    realmController.clearGlucoses();
+                }
             }
 
             @Override
@@ -106,7 +111,10 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
 
             @Override
             public void sendInsulinSuccess() {
-                realmController.clearInsulins();
+                boolean deleteAfterUpload = prefs.getBoolean(getString(R.string.pref_delete_after_upload_key), false);
+                if (deleteAfterUpload){
+                    realmController.clearInsulins();
+                }
             }
 
             @Override
@@ -114,12 +122,22 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
                 makeToast("Server was unable to receive insulin data");
             }
         };
-
         networkComm = new NetworkComm(this, operationsListener);
+
+        //load default fragment
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                GlucoseEntryFragment.newInstance(HelperMethods.getCurrentDate(), HelperMethods.getCurrentTime()))
+                .commit();
+
+        //reset preferences to default values DEBUG MODE
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.commit();
 
     }
 
-    private void initMyResources(){
+    private void initMyResources() {
         MyResources resources = MyResources.getInstance();
         resources.setDateFormat(getString(R.string.date_format));
         resources.setTimeFormat(getString(R.string.time_format));
@@ -127,17 +145,16 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
         resources.setInsulinValueFormat(getString(R.string.insulin_value_format));
     }
 
-    private void makeToast(String message){
+    private void makeToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
 
     @Override
     public void onBackPressed() {
-        if(drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
 
@@ -151,11 +168,11 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         drawer.closeDrawer(GravityCompat.START);
-        switch(menuItem.getItemId()){
+        switch (menuItem.getItemId()) {
             case R.id.value_input:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         GlucoseEntryFragment.newInstance(HelperMethods.getCurrentDate(), HelperMethods.getCurrentTime()))
-                .commit();
+                        .commit();
 
                 break;
 
@@ -180,26 +197,31 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
 
             case R.id.upload:
 
-                if(networkComm.isAlive()) {
+                if (networkComm.isAlive()) {
                     Runnable sendRunnable = new Runnable() {
                         @Override
                         public void run() {
                             networkComm.sendGlucose(realmController.getGlucoseList());
                             networkComm.sendInsulin(realmController.getInsulinList());
+                            makeToast("Upload success!");
                         }
                     };
-                    Thread sendThread = new Thread(sendRunnable, "sendGlucose");
+                    Thread sendThread = new Thread(sendRunnable, "sendData");
                     sendThread.start();
                 } else {
-                    Toast.makeText(this, "Server unreachable", Toast.LENGTH_SHORT).show();
+                    makeToast("Server unreachable");
                 }
                 break;
             case R.id.settings:
-                realmController.clearRealm();
+//                realmController.clearRealm();
+
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 break;
 
         }
 
         return true;
     }
+
+
 }
