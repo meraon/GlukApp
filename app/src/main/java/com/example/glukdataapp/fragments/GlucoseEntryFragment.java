@@ -172,17 +172,24 @@ public class GlucoseEntryFragment extends Fragment {
                             date.getTime(),
                             value);
                     realmController.saveValue(item);
+                    valueEditText.setText("");
+                    makeToast("Value saved!");
+
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
             }
         });
-
-
-
-
     }
 
+    private void makeToast(final String message){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     private void initOnDateSetListener(){
         onDateSetListener = new DatePickerDialog.OnDateSetListener() {

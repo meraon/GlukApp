@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +20,11 @@ import android.widget.Toast;
 
 import com.example.glukdataapp.realm.IRealmControl;
 import com.example.glukdataapp.realm.RealmControl;
+import com.example.glukdataapp.realm.models.GlucoseEntry;
 import com.example.glukdataapp.realm.models.IModel;
 import com.example.glukdataapp.realm.models.InsulinEntry;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.GlukDataViewHolder> {
@@ -168,10 +171,10 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.GlukDataView
         public GlukDataViewHolder(@NonNull View itemView, final AdapterOnClickListener listener) {
             super(itemView);
 
-            date = (TextView) itemView.findViewById(R.id.textViewDate);
-            time = (TextView) itemView.findViewById(R.id.textViewTime);
-            value = (TextView) itemView.findViewById(R.id.textViewValue);
-            delete = (ImageView) itemView.findViewById(R.id.imageViewDelete);
+            date = itemView.findViewById(R.id.textViewDate);
+            time = itemView.findViewById(R.id.textViewTime);
+            value = itemView.findViewById(R.id.textViewValue);
+            delete = itemView.findViewById(R.id.imageViewDelete);
 
             date.setOnClickListener(new View.OnClickListener() {
                 @Override

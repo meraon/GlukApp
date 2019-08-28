@@ -190,6 +190,8 @@ public class InsulinEntryFragment extends Fragment {
                             value,
                             dayDosage);
                     realmController.saveValue(item);
+                    valueEditText.setText("");
+                    makeToast("Value saved!");
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -202,9 +204,15 @@ public class InsulinEntryFragment extends Fragment {
                 setDayDosage(!dayDosage);
             }
         });
+    }
 
-
-
+    private void makeToast(final String message){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private Date getDate(){

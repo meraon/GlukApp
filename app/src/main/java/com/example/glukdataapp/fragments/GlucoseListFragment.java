@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +19,8 @@ import com.example.glukdataapp.EntryAdapter;
 import com.example.glukdataapp.R;
 import com.example.glukdataapp.realm.IRealmControl;
 import com.example.glukdataapp.realm.RealmControl;
+
+import main.java.gluklibrary.Glucose;
 
 /**
  * A simple {@link Fragment} subclass.

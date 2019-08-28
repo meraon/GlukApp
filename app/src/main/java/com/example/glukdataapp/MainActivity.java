@@ -145,8 +145,12 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
         resources.setInsulinValueFormat(getString(R.string.insulin_value_format));
     }
 
-    private void makeToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    public void makeToast(final String message) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
