@@ -30,6 +30,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import main.java.gluklibrary.HelperMethods;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -82,16 +84,12 @@ public class InsulinEntryFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param date Parameter 1.
-     * @param time Parameter 2.
      * @return A new instance of fragment GlucoseEntryFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static InsulinEntryFragment newInstance(String date, String time) {
+    public static InsulinEntryFragment newInstance() {
         InsulinEntryFragment fragment = new InsulinEntryFragment();
         Bundle args = new Bundle();
-        args.putString(DATE, date);
-        args.putString(TIME, time);
         fragment.setArguments(args);
         return fragment;
     }
@@ -100,21 +98,6 @@ public class InsulinEntryFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         realmController = new RealmControl();
-        if (getArguments() != null) {
-            date = getArguments().getString(DATE);
-            time = getArguments().getString(TIME);
-
-            String[] date_params = date.split("/");
-            String[] time_params = time.split(":");
-            Date dt = new Date(Integer.parseInt(date_params[0]) - 1900,
-                    Integer.parseInt(date_params[1]) - 1,
-                    Integer.parseInt(date_params[2]),
-                    Integer.parseInt(time_params[0]),
-                    Integer.parseInt(time_params[1]));
-            date_time = Calendar.getInstance();
-            date_time.setTime(dt);
-
-        }
     }
 
     @Override
@@ -137,39 +120,7 @@ public class InsulinEntryFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         setDayDosage(true);
-
         titleTextView.setText(TITLE);
-        dateButton.setText(date);
-        initOnDateSetListener();
-        dateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DatePickerDialog dialog = new DatePickerDialog(getContext(),
-                        R.style.MySpinnerDatePickerStyle,
-                        onDateSetListener,
-                        date_time.get(Calendar.YEAR),
-                        date_time.get(Calendar.MONTH),
-                        date_time.get(Calendar.DAY_OF_MONTH));
-                //dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.WHITE));;
-                dialog.show();
-            }
-        });
-        timeButton.setText(time);
-        initOnTimeSetListener();
-        timeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TimePickerDialog dialog = new TimePickerDialog(getContext(),
-                        R.style.MySpinnerTimePickerStyle,
-                        onTimeSetListener,
-                        date_time.get(Calendar.HOUR_OF_DAY),
-                        date_time.get(Calendar.MINUTE),
-                        true);
-                //dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));;
-                dialog.show();
-            }
-        });
-
         valueEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -202,6 +153,58 @@ public class InsulinEntryFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 setDayDosage(!dayDosage);
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initButtonsDateTime();
+    }
+
+    private void initButtonsDateTime(){
+        date = HelperMethods.getCurrentDate();
+        time = HelperMethods.getCurrentTime();
+
+        String[] date_params = date.split("/");
+        String[] time_params = time.split(":");
+        Date dt = new Date(Integer.parseInt(date_params[0]) - 1900,
+                Integer.parseInt(date_params[1]) - 1,
+                Integer.parseInt(date_params[2]),
+                Integer.parseInt(time_params[0]),
+                Integer.parseInt(time_params[1]));
+        date_time = Calendar.getInstance();
+        date_time.setTime(dt);
+
+        dateButton.setText(date);
+        initOnDateSetListener();
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatePickerDialog dialog = new DatePickerDialog(getContext(),
+                        R.style.MySpinnerDatePickerStyle,
+                        onDateSetListener,
+                        date_time.get(Calendar.YEAR),
+                        date_time.get(Calendar.MONTH),
+                        date_time.get(Calendar.DAY_OF_MONTH));
+                //dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.WHITE));;
+                dialog.show();
+            }
+        });
+        timeButton.setText(time);
+        initOnTimeSetListener();
+        timeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TimePickerDialog dialog = new TimePickerDialog(getContext(),
+                        R.style.MySpinnerTimePickerStyle,
+                        onTimeSetListener,
+                        date_time.get(Calendar.HOUR_OF_DAY),
+                        date_time.get(Calendar.MINUTE),
+                        true);
+                //dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));;
+                dialog.show();
             }
         });
     }
@@ -241,6 +244,22 @@ public class InsulinEntryFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof GlucoseEntryFragment.OnFragmentInteractionListener) {
+            mListener = (GlucoseEntryFragment.OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
 
     private void initOnDateSetListener(){
         onDateSetListener = new DatePickerDialog.OnDateSetListener() {
@@ -274,30 +293,6 @@ public class InsulinEntryFragment extends Fragment {
             return "0" + number;
         }
         else return String.valueOf(number);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof GlucoseEntryFragment.OnFragmentInteractionListener) {
-            mListener = (GlucoseEntryFragment.OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 
     /**

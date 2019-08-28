@@ -28,6 +28,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import main.java.gluklibrary.HelperMethods;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -69,16 +71,12 @@ public class GlucoseEntryFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param date Parameter 1.
-     * @param time Parameter 2.
      * @return A new instance of fragment GlucoseEntryFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static GlucoseEntryFragment newInstance(String date, String time) {
+    public static GlucoseEntryFragment newInstance() {
         GlucoseEntryFragment fragment = new GlucoseEntryFragment();
         Bundle args = new Bundle();
-        args.putString(DATE, date);
-        args.putString(TIME, time);
         fragment.setArguments(args);
         return fragment;
     }
@@ -87,21 +85,6 @@ public class GlucoseEntryFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         realmController = new RealmControl();
-        if (getArguments() != null) {
-            date = getArguments().getString(DATE);
-            time = getArguments().getString(TIME);
-
-            String[] date_params = date.split("/");
-            String[] time_params = time.split(":");
-            Date dt = new Date(Integer.parseInt(date_params[0]) - 1900,
-                    Integer.parseInt(date_params[1]) - 1,
-                    Integer.parseInt(date_params[2]),
-                    Integer.parseInt(time_params[0]),
-                    Integer.parseInt(time_params[1]));
-            date_time = Calendar.getInstance();
-            date_time.setTime(dt);
-
-        }
     }
 
     @Override
@@ -121,8 +104,54 @@ public class GlucoseEntryFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         titleTextView.setText(TITLE);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Float value = getValue();
+                if (value == null){
+                    Toast.makeText(getContext(), "Unable to parse value", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                try {
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.ENGLISH);
+                    String dateInString = dateButton.getText() + " " + timeButton.getText();
+                    Date date = formatter.parse(dateInString);
+                    GlucoseEntry item = new GlucoseEntry(realmController.generateGlucoseId(),
+                            date.getTime(),
+                            value);
+                    realmController.saveValue(item);
+                    valueEditText.setText("");
+                    makeToast("Value saved!");
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initButtonsDateTime();
+    }
+
+    private void initButtonsDateTime(){
+        date = HelperMethods.getCurrentDate();
+        time = HelperMethods.getCurrentTime();
+        String[] date_params = date.split("/");
+        String[] time_params = time.split(":");
+        Date dt = new Date(Integer.parseInt(date_params[0]) - 1900,
+                Integer.parseInt(date_params[1]) - 1,
+                Integer.parseInt(date_params[2]),
+                Integer.parseInt(time_params[0]),
+                Integer.parseInt(time_params[1]));
+        date_time = Calendar.getInstance();
+        date_time.setTime(dt);
+
         dateButton.setText(date);
         initOnDateSetListener();
         dateButton.setOnClickListener(new View.OnClickListener() {
@@ -151,33 +180,6 @@ public class GlucoseEntryFragment extends Fragment {
                         true);
                 //dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));;
                 dialog.show();
-            }
-        });
-
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Float value = getValue();
-                if (value == null){
-                    Toast.makeText(getContext(), "Unable to parse value", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                try {
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.ENGLISH);
-                    String dateInString = dateButton.getText() + " " + timeButton.getText();
-                    Date date = formatter.parse(dateInString);
-                    GlucoseEntry item = new GlucoseEntry(realmController.generateGlucoseId(),
-                            date.getTime(),
-                            value);
-                    realmController.saveValue(item);
-                    valueEditText.setText("");
-                    makeToast("Value saved!");
-
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
             }
         });
     }

@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
 
         //load default fragment
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                GlucoseEntryFragment.newInstance(HelperMethods.getCurrentDate(), HelperMethods.getCurrentTime()))
+                GlucoseEntryFragment.newInstance())
                 .commit();
 
         //reset preferences to default values DEBUG MODE
@@ -175,14 +175,14 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
         switch (menuItem.getItemId()) {
             case R.id.value_input:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        GlucoseEntryFragment.newInstance(HelperMethods.getCurrentDate(), HelperMethods.getCurrentTime()))
+                        GlucoseEntryFragment.newInstance())
                         .commit();
 
                 break;
 
             case R.id.insulin_input:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        InsulinEntryFragment.newInstance(HelperMethods.getCurrentDate(), HelperMethods.getCurrentTime()))
+                        InsulinEntryFragment.newInstance())
                         .commit();
 
                 break;
