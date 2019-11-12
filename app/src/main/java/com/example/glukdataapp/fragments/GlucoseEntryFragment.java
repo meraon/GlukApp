@@ -125,7 +125,6 @@ public class GlucoseEntryFragment extends Fragment {
                     realmController.saveValue(item);
                     valueEditText.setText("");
                     makeToast("Value saved!");
-
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }

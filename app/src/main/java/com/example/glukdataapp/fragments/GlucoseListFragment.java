@@ -61,7 +61,6 @@ public class GlucoseListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         realmController = new RealmControl();
 
     }

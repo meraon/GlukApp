@@ -200,7 +200,6 @@ public class MainActivity extends AppCompatActivity implements GlucoseEntryFragm
                 break;
 
             case R.id.upload:
-
                 if (networkComm.isAlive()) {
                     Runnable sendRunnable = new Runnable() {
                         @Override
